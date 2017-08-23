@@ -96,7 +96,7 @@ public class MainActivity extends Activity {
         map.put("type", "getChartByID");
         map.put("page", page + "");
 
-        String url = OkHttpClientManager.attachHttpGetParams("http://192.168.0.104:8080/ChatDemoService/chartServlet", map);
+        String url = OkHttpClientManager.attachHttpGetParams("http://172.18.219.108:8080/ChatDemoService/chartServlet", map);
         manager.getAsync(url, new OkHttpClientManager.DataCallBack() {
             @Override
             public void requestFailure(Request request, IOException e) {
@@ -109,11 +109,22 @@ public class MainActivity extends Activity {
                 JSONObject object = new JSONObject(result);
                 String flag = object.getString("error");
                 if (flag.equals("ok")) {
-                    content = content + object.optJSONObject("object").optString("content");
-                    handler.sendEmptyMessage(1001);
-                    page++;
+                    String a = object.optJSONObject("object").optString("content");
+                    if (a==null||a.equals("")||a.equals("null")){
+                        page = 1;
+                        handler.sendEmptyMessage(1002);
+                    }else {
+                        content = content + object.optJSONObject("object").optString("content");
+                        handler.sendEmptyMessage(1001);
+                        page++;
+                    }
+
+
                 } else {
-                    Toast.makeText(context, "服务器错误！", Toast.LENGTH_SHORT).show();
+
+                    //Toast.makeText(context, "服务器错误！", Toast.LENGTH_SHORT).show();
+                    page = 1;
+                    handler.sendEmptyMessage(1002);
                 }
             }
         });
@@ -209,6 +220,9 @@ public class MainActivity extends Activity {
             switch (msg.what) {
                 case 1001:
                     updataView();
+                    break;
+                case 1002:
+                    doGetChartDate();
                     break;
                 default:
                     break;
